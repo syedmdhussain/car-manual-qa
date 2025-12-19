@@ -1,0 +1,35 @@
+🚀 QUICK START GUIDE
+===================
+
+1. GET API KEY (Optional but Recommended):
+   - Go to: https://platform.openai.com/api-keys
+   - Sign up (free $5 credit!)
+   - Create API key
+   - Copy the key (starts with sk-...)
+
+2. ADD TO .env FILE:
+   echo "OPENAI_API_KEY=sk-your-key-here" > .env
+   
+   OR create .env file manually with:
+   OPENAI_API_KEY=sk-your-actual-key-here
+
+3. LAUNCH THE APP:
+   ./start.sh
+   
+   OR:
+   python3 -m streamlit run app.py
+
+4. OPEN IN BROWSER:
+   The terminal will show a URL like:
+   http://localhost:8501
+   
+   Copy and paste it in your browser!
+
+5. ASK QUESTIONS:
+   - "How to turn on indicator in MG Astor?"
+   - "Which engine oil to use in Tiago?"
+
+NOTE: First run takes 2-3 minutes (processing PDFs)
+      Subsequent runs are much faster!
+
+The app works WITHOUT API key too (uses simple extraction)
