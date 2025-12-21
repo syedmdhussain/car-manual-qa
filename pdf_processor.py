@@ -5,7 +5,7 @@ Extracts text from car manuals and stores them in a structured format.
 
 import pdfplumber
 import os
-from typing import Dict, List, Tuple
+from typing import Dict, List
 import json
 
 
@@ -18,16 +18,17 @@ class PDFProcessor:
         
     def extract_text_from_pdf(self, pdf_path: str) -> str:
         """Extract all text from a PDF file."""
-        text = ""
+        parts: List[str] = []
         try:
             with pdfplumber.open(pdf_path) as pdf:
                 for page in pdf.pages:
                     page_text = page.extract_text()
                     if page_text:
-                        text += page_text + "\n"
+                        parts.append(page_text)
         except Exception as e:
             print(f"Error extracting text from {pdf_path}: {e}")
-        return text
+        # Joining once avoids quadratic behavior from repeated string concatenation.
+        return "\n".join(parts) + ("\n" if parts else "")
     
     def chunk_text(self, text: str, chunk_size: int = 500, overlap: int = 100) -> List[Dict]:
         """Split text into chunks with metadata."""
