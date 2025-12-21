@@ -30,6 +30,10 @@ wheels/
 processed_manuals.json
 *.pdf
 
+# FAISS Index files (generated)
+faiss_index.bin
+faiss_metadata.json
+
 # IDE
 .vscode/
 .idea/

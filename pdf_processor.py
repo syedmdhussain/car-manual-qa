@@ -47,17 +47,23 @@ class PDFProcessor:
         return chunks
     
     def process_manual(self, pdf_path: str, car_model: str) -> Dict:
-        """Process a manual PDF and return structured data."""
+        """
+        Process a manual PDF and return structured data.
+        Optimized: full_text is not stored in memory after chunking.
+        """
         print(f"Processing {car_model} manual...")
         full_text = self.extract_text_from_pdf(pdf_path)
         chunks = self.chunk_text(full_text)
         
         manual_data = {
             "car_model": car_model,
-            "full_text": full_text,
             "chunks": chunks,
             "total_chunks": len(chunks)
+            # full_text not stored to save memory
         }
+        
+        # Explicitly free memory
+        del full_text
         
         self.manuals_data[car_model] = manual_data
         return manual_data
