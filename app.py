@@ -62,11 +62,12 @@ def load_manuals():
 
 
 def initialize_search_engine():
-    """Initialize the search engine."""
+    """Initialize the search engine with optimized index loading."""
     if st.session_state.search_engine is None:
-        with st.spinner("Initializing search engine (this may take a minute)..."):
+        with st.spinner("Initializing search engine..."):
             manuals_data = load_manuals()
             search_engine = ManualSearchEngine()
+            # build_index will automatically load cached index if available
             search_engine.build_index(manuals_data)
             st.session_state.search_engine = search_engine
             st.session_state.manuals_loaded = True
