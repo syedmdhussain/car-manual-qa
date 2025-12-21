@@ -4,6 +4,7 @@ Streamlit Web Application for Car Manual Q&A
 
 import streamlit as st
 import os
+import hashlib
 from pdf_processor import PDFProcessor, detect_car_model
 from search_engine import ManualSearchEngine
 from qa_system import QASystem
@@ -31,13 +32,22 @@ if 'manuals_loaded' not in st.session_state:
     st.session_state.manuals_loaded = False
 
 
+def _sha256_file(path: str) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
 @st.cache_resource
 def load_manuals():
     """Load and process car manuals."""
     processor = PDFProcessor()
     
     # Check if processed data exists
-    if os.path.exists("processed_manuals.json"):
+    processed_path = "processed_manuals.json"
+    if os.path.exists(processed_path):
         print("Loading pre-processed manuals...")
         manuals_data = processor.load_processed_data()
     else:
@@ -57,18 +67,27 @@ def load_manuals():
         # Save processed data
         processor.save_processed_data()
         manuals_data = processor.manuals_data
-    
-    return manuals_data
+
+    # Fingerprint the processed manual content so we can persist/load the FAISS cache safely.
+    fingerprint = _sha256_file(processed_path) if os.path.exists(processed_path) else "no_processed_manuals"
+    return manuals_data, fingerprint
+
+
+@st.cache_resource
+def get_search_engine(manuals_fingerprint: str):
+    """Create/load a shared search engine + index for this manuals fingerprint."""
+    manuals_data, _ = load_manuals()
+    engine = ManualSearchEngine(cache_dir=".cache")
+    engine.build_index(manuals_data, fingerprint=manuals_fingerprint, cache_dir=".cache")
+    return engine
 
 
 def initialize_search_engine():
     """Initialize the search engine."""
     if st.session_state.search_engine is None:
         with st.spinner("Initializing search engine (this may take a minute)..."):
-            manuals_data = load_manuals()
-            search_engine = ManualSearchEngine()
-            search_engine.build_index(manuals_data)
-            st.session_state.search_engine = search_engine
+            manuals_data, fingerprint = load_manuals()
+            st.session_state.search_engine = get_search_engine(fingerprint)
             st.session_state.manuals_loaded = True
 
 

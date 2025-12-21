@@ -5,9 +5,6 @@ Uses Retrieval-Augmented Generation with LLMs for better answers.
 
 from typing import List, Dict, Optional
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 class RAGQASystem:
@@ -20,6 +17,14 @@ class RAGQASystem:
         Args:
             use_llm: Whether to use LLM (requires API key) or fallback to simple extraction
         """
+        # Load environment variables lazily to reduce import-time overhead.
+        # (Also ensures .env is applied before we read OPENAI_API_KEY.)
+        try:
+            from dotenv import load_dotenv
+            load_dotenv()
+        except ModuleNotFoundError:
+            pass
+
         self.use_llm = use_llm
         self.openai_api_key = os.getenv("OPENAI_API_KEY")
         self.ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
