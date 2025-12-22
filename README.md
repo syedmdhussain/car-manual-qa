@@ -114,8 +114,12 @@ car-manual-qa/
 - Check file names match: `Astor Manual.pdf` and `APP-TIAGO-FINAL-OMSB.pdf`
 
 ### Slow first load
-- **First run**: Processes PDFs and builds the search index (may take 2-3 minutes)
-- **Subsequent runs**: Uses cached index and loads in < 0.01 seconds (99.99% faster!)
+- **First run**: Processes PDFs and builds the search index (may take 2-3 minutes) - ⚠️ **NOT OPTIMIZED**
+  - This is unavoidable work that must be done once
+  - Happens only when no cached index exists
+- **Subsequent runs**: Uses cached index and loads in < 0.01 seconds (99.99% faster!) - ✅ **OPTIMIZED**
+  - Every restart after first run
+  - Saves 2-3 minutes on every session
 - Index is automatically saved after first build (`faiss_index.bin`)
 
 ### No results found
