@@ -57,9 +57,13 @@ car-manual-qa/
 ├── app.py                 # Main Streamlit application
 ├── pdf_processor.py       # PDF text extraction and processing
 ├── search_engine.py       # Semantic search implementation
-├── qa_system.py          # Answer generation system
+├── rag_qa_system.py       # RAG-based answer generation with LLMs
+├── qa_system.py          # Fallback Q&A system
 ├── requirements.txt      # Python dependencies
 ├── README.md             # This file
+├── RAG_SETUP.md          # RAG setup guide
+├── Astor Manual.pdf      # MG Astor manual
+├── APP-TIAGO-FINAL-OMSB.pdf # Tata Tiago manual
 └── processed_manuals.json # Cached processed manual data (auto-generated)
 ```
 
