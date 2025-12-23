@@ -21,12 +21,7 @@ st.set_page_config(
 if 'search_engine' not in st.session_state:
     st.session_state.search_engine = None
 if 'qa_system' not in st.session_state:
-    # Try to use RAG system, fallback to simple Q&A
-    use_rag = os.getenv("OPENAI_API_KEY") or os.getenv("USE_OLLAMA", "").lower() == "true"
-    if use_rag:
-        st.session_state.qa_system = RAGQASystem(use_llm=True)
-    else:
-        st.session_state.qa_system = QASystem()
+    st.session_state.qa_system = None  # Will be initialized with embedding model later
 if 'manuals_loaded' not in st.session_state:
     st.session_state.manuals_loaded = False
 
@@ -72,9 +67,13 @@ def initialize_search_engine():
             st.session_state.search_engine = search_engine
             st.session_state.manuals_loaded = True
             
-            # Update QA system with embedding model for evaluation
-            if isinstance(st.session_state.qa_system, RAGQASystem):
-                st.session_state.qa_system.evaluator.embedding_model = search_engine.model
+            # Initialize QA system with embedding model for evaluation
+            if st.session_state.qa_system is None:
+                use_rag = os.getenv("OPENAI_API_KEY") or os.getenv("USE_OLLAMA", "").lower() == "true"
+                if use_rag:
+                    st.session_state.qa_system = RAGQASystem(use_llm=True, embedding_model=search_engine.model)
+                else:
+                    st.session_state.qa_system = QASystem()
 
 
 def main():
