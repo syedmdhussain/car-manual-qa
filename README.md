@@ -71,60 +71,32 @@ car-manual-qa/
 4. **Answer Generation**: The `QASystem` generates answers from the most relevant chunks
 5. **Citation Display**: Sources are displayed with excerpts from the manual
 
-## Design Considerations & Performance Optimizations
+## Performance Optimizations ⚡
 
-### 1. Storage Considerations ⚡ Optimized
-**Problem**: Index rebuilt on every restart (2-3 minutes)  
-**Solution**: Persistent FAISS index with multi-level caching
+This system is optimized for production-level performance:
 
-**Optimizations**:
-- **Persistent FAISS Index**: Saved to disk (`faiss_index.bin`) - **99.99% faster startup**
-  - Before: 2-3 minutes (rebuild every time)
-  - After: 0.002 seconds (load from disk)
-- **Chunked Storage Only**: Full text removed after processing - **40% memory reduction**
-  - Before: ~500 MB (full text + chunks)
-  - After: ~300 MB (chunks only)
-- **Multi-level Caching**:
-  - Processed manuals: `processed_manuals.json`
-  - FAISS index: `faiss_index.bin` (336 KB)
-  - Query embeddings: In-memory LRU cache (100 queries)
+### Storage & Caching
+- **Persistent FAISS Index**: Vector index saved to disk (`faiss_index.bin`)
+- **Processed Data Cache**: Pre-processed manuals stored in `processed_manuals.json`
+- **Query Embedding Cache**: In-memory LRU cache for repeated queries (100 entries)
+- **Memory Efficient**: Only chunks stored, full text freed after processing
 
-### 2. Input Processing Strategy ⚡ Optimized
-**Problem**: Model loaded immediately on init (~2 seconds), blocking startup  
-**Solution**: Lazy loading and batch processing
-
-**Optimizations**:
-- **Lazy Model Loading**: Loads only when first needed - **99.99% faster init**
-  - Before: ~2 seconds (immediate load)
-  - After: < 0.0001 seconds (deferred)
-- **Batch Embedding Generation**: All 224 chunks processed together
-- **Memory Optimization**: Explicit `del full_text` after chunking
-- **Fast Model Detection**: Keyword-based (no LLM required)
-- **Text Chunking**: 500 words per chunk, 100-word overlap for context preservation
-- **PDF Extraction**: Using `pdfplumber` for text extraction
-
-### 3. Search Optimizations ⚡ Optimized
-**Problem**: Query embeddings regenerated every time (~100ms each)  
-**Solution**: Query caching and persistent index
-
-**Optimizations**:
-- **Query Embedding Cache**: Instant for repeated queries - **99% faster**
-  - Before: ~100ms per query (regenerate embedding)
-  - After: < 1ms (cached)
-- **Persistent Index**: Fast vector search
-  - Before: 2-3 minutes (rebuild index)
-  - After: 0.002 seconds (load cached index)
+### Fast Startup & Search
+- **Lazy Model Loading**: Sentence transformer loads only when first needed
+- **Index Persistence**: Subsequent runs load cached index (0.002s vs 2-3 min rebuild)
+- **Query Caching**: Repeated queries return instantly (<1ms vs ~100ms)
 - **FAISS IndexFlatL2**: Optimized C++ backend for fast similarity search
-- **Multi-level Search**:
-  - Primary: Semantic search (sentence transformers)
-  - Fallback: Keyword search for edge cases
-- **Post-search Filtering**: Efficient car model filtering
 
-### Output Structure
-- Clear answer display
-- Numbered citations with excerpts
-- Expandable citation sections
-- Confidence scoring (high/medium/low)
+### Smart Processing
+- **Batch Embedding Generation**: All chunks processed together for efficiency
+- **Multi-level Search**: Semantic search with keyword fallback
+- **Text Chunking**: 500 words per chunk, 100-word overlap for context
+- **Car Model Filtering**: Post-search filtering for targeted results
+
+### Results
+- **Startup**: 99.99% faster on subsequent runs (cached index)
+- **Memory**: 40% reduction (chunks only, no full text)
+- **Queries**: 99% faster for repeated questions (embedding cache)
 
 ## Troubleshooting
 
