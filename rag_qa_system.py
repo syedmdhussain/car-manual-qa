@@ -6,6 +6,7 @@ Uses Retrieval-Augmented Generation with LLMs for better answers.
 from typing import List, Dict, Optional
 import os
 from dotenv import load_dotenv
+from evaluation import AnswerEvaluator, track_response_time
 
 load_dotenv()
 
@@ -13,16 +14,20 @@ load_dotenv()
 class RAGQASystem:
     """RAG-based Q&A system using LLMs."""
     
-    def __init__(self, use_llm: bool = True):
+    def __init__(self, use_llm: bool = True, embedding_model=None):
         """
         Initialize RAG Q&A system.
         
         Args:
             use_llm: Whether to use LLM (requires API key) or fallback to simple extraction
+            embedding_model: SentenceTransformer model for evaluation (optional)
         """
         self.use_llm = use_llm
         self.openai_api_key = os.getenv("OPENAI_API_KEY")
         self.ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        
+        # Initialize evaluator
+        self.evaluator = AnswerEvaluator(embedding_model=embedding_model)
         
         # Check if we can use LLM
         if use_llm:
@@ -49,13 +54,20 @@ class RAGQASystem:
                     self.use_llm = False
                     print("⚠️ No LLM available, using simple extraction")
     
+    @track_response_time
     def generate_answer(self, question: str, search_results: List[Dict]) -> Dict:
-        """Generate an answer using RAG."""
+        """Generate an answer using RAG with quality metrics."""
         if not search_results:
             return {
                 "answer": "I couldn't find relevant information in the manual to answer your question.",
                 "citations": [],
-                "confidence": "low"
+                "confidence": "low",
+                "metrics": {
+                    "answer_relevance": 0.0,
+                    "faithfulness": 0.0,
+                    "context_relevance": 0.0,
+                    "overall_score": 0.0
+                }
             }
         
         # Calculate confidence based on search result quality
@@ -78,10 +90,15 @@ class RAGQASystem:
         else:
             answer = self._simple_extraction(question, search_results)
         
+        # Evaluate answer quality
+        context_chunks = [result["text"] for result in search_results[:5]]
+        metrics = self.evaluator.evaluate_answer(question, answer, context_chunks)
+        
         return {
             "answer": answer,
             "citations": citations,
-            "confidence": confidence
+            "confidence": confidence,
+            "metrics": metrics
         }
     
     def _calculate_confidence(self, search_results: List[Dict]) -> str:

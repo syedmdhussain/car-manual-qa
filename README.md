@@ -107,6 +107,59 @@ This system is optimized for production-level performance:
   - First time asking: ~100ms (generates embedding)
   - Same/similar question: < 1ms (uses cached embedding)
 
+## Answer Quality Evaluation 📊
+
+The system includes comprehensive metrics to evaluate answer quality:
+
+### Evaluation Metrics
+
+1. **Answer Relevance** (40% weight)
+   - Measures semantic similarity between question and answer
+   - Uses sentence embeddings to ensure answer addresses the question
+   - Range: 0-100% (higher = more relevant)
+
+2. **Faithfulness** (40% weight)
+   - Checks if answer is grounded in the retrieved context
+   - Prevents hallucinations by verifying answer content matches manual
+   - Compares answer sentences against source chunks
+   - Range: 0-100% (higher = more faithful to source)
+
+3. **Context Relevance** (20% weight)
+   - Evaluates quality of retrieved manual sections
+   - Measures how relevant the retrieved chunks are to the question
+   - Helps identify if search found the right information
+   - Range: 0-100% (higher = better retrieval)
+
+4. **Overall Quality Score**
+   - Weighted average of all metrics
+   - Provides single quality indicator
+   - 🟢 Excellent (≥80%) | 🟡 Good (≥60%) | 🟠 Fair (≥40%) | 🔴 Poor (<40%)
+
+### Response Time Tracking
+
+- Every answer includes response time measurement
+- Helps monitor system performance
+- Typical response times:
+  - With LLM (OpenAI): 1-3 seconds
+  - Without LLM: < 1 second
+
+### Why This Matters
+
+**For RAG systems, evaluation is critical:**
+- ✅ **Transparency**: Users see quality metrics for each answer
+- ✅ **Trust**: Faithfulness score shows answer isn't hallucinated
+- ✅ **Relevance**: Answer relevance ensures question is addressed
+- ✅ **Debugging**: Metrics help identify retrieval vs generation issues
+- ✅ **Continuous Improvement**: Track quality over time
+
+### Technical Implementation
+
+The evaluation system (`evaluation.py`):
+- Uses the same sentence-transformer model for efficiency
+- Calculates metrics in real-time (adds ~0.1s overhead)
+- Provides both numeric scores and visual indicators
+- Works with or without LLM
+
 ## Troubleshooting
 
 ### Manuals not loading

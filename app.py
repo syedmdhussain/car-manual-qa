@@ -71,6 +71,10 @@ def initialize_search_engine():
             search_engine.build_index(manuals_data)
             st.session_state.search_engine = search_engine
             st.session_state.manuals_loaded = True
+            
+            # Update QA system with embedding model for evaluation
+            if isinstance(st.session_state.qa_system, RAGQASystem):
+                st.session_state.qa_system.evaluator.embedding_model = search_engine.model
 
 
 def main():
@@ -167,15 +171,74 @@ def main():
                         st.subheader("💬 Answer")
                         st.write(answer_data["answer"])
                         
-                        # Display confidence if available
-                        if "confidence" in answer_data:
-                            confidence = answer_data["confidence"]
-                            if confidence == "high":
-                                st.success("✅ High confidence answer")
-                            elif confidence == "medium":
-                                st.info("ℹ️ Medium confidence answer")
-                            else:
-                                st.warning("⚠️ Low confidence - answer may be incomplete")
+                        # Display quality metrics
+                        col1, col2 = st.columns(2)
+                        
+                        with col1:
+                            # Display confidence if available
+                            if "confidence" in answer_data:
+                                confidence = answer_data["confidence"]
+                                if confidence == "high":
+                                    st.success("✅ High confidence answer")
+                                elif confidence == "medium":
+                                    st.info("ℹ️ Medium confidence answer")
+                                else:
+                                    st.warning("⚠️ Low confidence - answer may be incomplete")
+                        
+                        with col2:
+                            # Display response time
+                            if "response_time" in answer_data:
+                                response_time = answer_data["response_time"]
+                                st.metric("⏱️ Response Time", f"{response_time:.2f}s")
+                        
+                        # Display evaluation metrics
+                        if "metrics" in answer_data and answer_data["metrics"]:
+                            metrics = answer_data["metrics"]
+                            
+                            st.markdown("### 📊 Answer Quality Metrics")
+                            
+                            # Create metrics row
+                            metric_cols = st.columns(4)
+                            
+                            with metric_cols[0]:
+                                score = metrics.get("answer_relevance", 0)
+                                st.metric(
+                                    "🎯 Answer Relevance",
+                                    f"{score:.0%}",
+                                    help="How well the answer addresses the question"
+                                )
+                            
+                            with metric_cols[1]:
+                                score = metrics.get("faithfulness", 0)
+                                st.metric(
+                                    "✓ Faithfulness",
+                                    f"{score:.0%}",
+                                    help="How well the answer is grounded in the manual (no hallucinations)"
+                                )
+                            
+                            with metric_cols[2]:
+                                score = metrics.get("context_relevance", 0)
+                                st.metric(
+                                    "📄 Context Quality",
+                                    f"{score:.0%}",
+                                    help="Relevance of retrieved manual sections"
+                                )
+                            
+                            with metric_cols[3]:
+                                score = metrics.get("overall_score", 0)
+                                if score >= 0.8:
+                                    emoji = "🟢"
+                                elif score >= 0.6:
+                                    emoji = "🟡"
+                                elif score >= 0.4:
+                                    emoji = "🟠"
+                                else:
+                                    emoji = "🔴"
+                                st.metric(
+                                    f"{emoji} Overall Quality",
+                                    f"{score:.0%}",
+                                    help="Weighted average of all metrics"
+                                )
                         
                         # Display citations
                         if answer_data["citations"]:
