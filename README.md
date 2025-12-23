@@ -50,6 +50,38 @@ streamlit run app.py
 
 4. **View the answer** with citations from the manual
 
+## Testing
+
+Run the test suite to verify functionality:
+
+```bash
+# Run all tests
+pytest tests/
+
+# Run with verbose output
+pytest tests/ -v
+
+# Run specific test file
+pytest tests/test_evaluation.py -v
+
+# Run with coverage report
+pytest tests/ --cov=. --cov-report=term-missing
+```
+
+### Test Coverage
+
+The test suite covers:
+- **Evaluation metrics**: Answer relevance, faithfulness, context quality
+- **PDF processing**: Text extraction, chunking, car model detection  
+- **Search engine**: Index building, query caching, keyword search
+- **Response tracking**: Time measurement decorator
+
+Tests ensure:
+- ✅ Core functionality works correctly
+- ✅ Edge cases are handled (empty inputs, missing data)
+- ✅ Metrics are in valid ranges (0-1)
+- ✅ Caching and optimization features work
+
 ## Project Structure
 
 ```
