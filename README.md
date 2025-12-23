@@ -15,7 +15,7 @@ A Streamlit web application that allows users to ask questions about car manuals
 ## Requirements
 
 - Python 3.6 or above
-- PDF manuals (MG Astor and Tata Tiago)
+- PDF manuals (MG Astor and Tata Tiago) — **✅ Included in repository**
 
 ## Installation
 
@@ -26,7 +26,7 @@ A Streamlit web application that allows users to ask questions about car manuals
 pip install -r requirements.txt
 ```
 
-3. **Place your PDF manuals in the directory:**
+3. **PDF Manuals** — ✅ Already included for evaluation:
    - `Astor Manual.pdf` (MG Astor manual)
    - `APP-TIAGO-FINAL-OMSB.pdf` (Tata Tiago manual)
 
@@ -153,6 +153,11 @@ car-manual-qa/
 - Image processing and OCR
 - Advanced LLM integration for better answers
 - Multi-language support
+
+## Note
+
+**PDF manuals are included in this repository for evaluation purposes only.**  
+This makes the project immediately runnable for reviewers without requiring external file downloads.
 
 ## License
 
