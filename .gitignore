@@ -28,7 +28,7 @@ wheels/
 
 # Data files
 processed_manuals.json
-*.pdf
+# PDF manuals are committed for take-home test evaluation
 
 # FAISS Index files (generated)
 faiss_index.bin
