@@ -135,7 +135,7 @@ class RAGQASystem:
             
             # Create improved prompt
             car_model = search_results[0]["car_model"] if search_results else "the car"
-            prompt = f"""You are an expert car manual assistant. Answer the user's question based ONLY on the provided manual excerpts from the {car_model} owner's manual.
+            prompt = f"""You are an expert car manual assistant. Answer the user's question based on the provided manual excerpts from the {car_model} owner's manual.
 
 MANUAL EXCERPTS:
 {context}
@@ -143,12 +143,13 @@ MANUAL EXCERPTS:
 USER QUESTION: {question}
 
 INSTRUCTIONS:
-1. Answer directly and concisely based ONLY on the provided manual excerpts
-2. If the information is not in the excerpts, clearly state: "I couldn't find specific information about this in the {car_model} manual"
-3. Include specific steps, numbers, or measurements when mentioned in the manual
-4. Use bullet points for step-by-step instructions
-5. Reference the car model ({car_model}) when relevant
+1. Answer directly and clearly based on the provided manual excerpts
+2. ONLY say you couldn't find information if the excerpts contain NO relevant information at all
+3. If you found ANY relevant information in the excerpts, provide it without disclaimers
+4. Include specific steps, numbers, or measurements when mentioned in the manual
+5. Use bullet points for step-by-step instructions when appropriate
 6. Be helpful and clear, as if explaining to a car owner
+7. Do NOT add phrases like "I couldn't find" if you just provided useful information
 
 ANSWER:"""
             
