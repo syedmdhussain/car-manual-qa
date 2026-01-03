@@ -230,3 +230,33 @@ class ManualSearchEngine:
         # Sort by score and return top_k
         results.sort(key=lambda x: x["score"], reverse=True)
         return results[:top_k]
+    
+    def hybrid_search(self, query: str, car_model: str = None, top_k: int = 10) -> List[Dict]:
+        """
+        Hybrid search combining semantic and keyword-based approaches.
+        Reranks semantic results by keyword matches for better accuracy.
+        """
+        # Get semantic search results (more candidates)
+        semantic_results = self.search(query, car_model, top_k=top_k * 2)
+        
+        if not semantic_results:
+            return []
+        
+        # Extract important keywords from query (remove common words)
+        stopwords = {'how', 'to', 'what', 'where', 'when', 'which', 'who', 'the', 'a', 'an', 'in', 'on', 'is', 'are'}
+        query_keywords = [word.lower() for word in query.split() if word.lower() not in stopwords]
+        
+        # Rerank by combining semantic score with keyword matches
+        for result in semantic_results:
+            text_lower = result["text"].lower()
+            # Count keyword matches
+            keyword_score = sum(1 for keyword in query_keywords if keyword in text_lower)
+            # Normalize semantic distance (lower is better) to 0-1 range
+            semantic_score = 1.0 / (1.0 + result["distance"])
+            # Combined score: 60% semantic + 40% keyword
+            result["hybrid_score"] = (0.6 * semantic_score) + (0.4 * keyword_score / max(len(query_keywords), 1))
+        
+        # Sort by hybrid score (higher is better)
+        semantic_results.sort(key=lambda x: x["hybrid_score"], reverse=True)
+        
+        return semantic_results[:top_k]
