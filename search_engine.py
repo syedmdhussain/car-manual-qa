@@ -243,18 +243,30 @@ class ManualSearchEngine:
             return []
         
         # Extract important keywords from query (remove common words)
-        stopwords = {'how', 'to', 'what', 'where', 'when', 'which', 'who', 'the', 'a', 'an', 'in', 'on', 'is', 'are'}
-        query_keywords = [word.lower() for word in query.split() if word.lower() not in stopwords]
+        stopwords = {'how', 'to', 'what', 'where', 'when', 'which', 'who', 'the', 'a', 'an', 'in', 'on', 'is', 'are', 'do', 'does', 'i', 'my'}
+        query_keywords = [word.lower() for word in query.split() if word.lower() not in stopwords and len(word) > 2]
+        
+        # Also check for two-word phrases (e.g., "direction indicator")
+        query_lower = query.lower()
+        two_word_phrases = []
+        words = [w for w in query_lower.split() if w not in stopwords]
+        for i in range(len(words) - 1):
+            two_word_phrases.append(f"{words[i]} {words[i+1]}")
         
         # Rerank by combining semantic score with keyword matches
         for result in semantic_results:
             text_lower = result["text"].lower()
-            # Count keyword matches
+            # Count single keyword matches
             keyword_score = sum(1 for keyword in query_keywords if keyword in text_lower)
+            # Bonus for two-word phrase matches (worth 2x)
+            phrase_score = sum(2 for phrase in two_word_phrases if phrase in text_lower)
+            # Total keyword score
+            total_keyword_score = keyword_score + phrase_score
             # Normalize semantic distance (lower is better) to 0-1 range
             semantic_score = 1.0 / (1.0 + result["distance"])
-            # Combined score: 60% semantic + 40% keyword
-            result["hybrid_score"] = (0.6 * semantic_score) + (0.4 * keyword_score / max(len(query_keywords), 1))
+            # Combined score: 40% semantic + 60% keyword (keywords more important!)
+            max_keywords = max(len(query_keywords) + len(two_word_phrases), 1)
+            result["hybrid_score"] = (0.4 * semantic_score) + (0.6 * total_keyword_score / max_keywords)
         
         # Sort by hybrid score (higher is better)
         semantic_results.sort(key=lambda x: x["hybrid_score"], reverse=True)
