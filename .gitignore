@@ -44,4 +44,16 @@ faiss_metadata.json
 # OS
 .DS_Store
 Thumbs.db
+
+# Environment variables (IMPORTANT: Never commit API keys!)
 .env
+
+# Logs
+*.log
+streamlit.log
+
+# Temporary files
+*.zip
+*~
+.tmp/
+temp/
