@@ -29,8 +29,8 @@ class PDFProcessor:
             print(f"Error extracting text from {pdf_path}: {e}")
         return text
     
-    def chunk_text(self, text: str, chunk_size: int = 500, overlap: int = 100) -> List[Dict]:
-        """Split text into chunks with metadata."""
+    def chunk_text(self, text: str, chunk_size: int = 200, overlap: int = 50) -> List[Dict]:
+        """Split text into chunks with metadata. Smaller chunks for better semantic search."""
         chunks = []
         words = text.split()
         
