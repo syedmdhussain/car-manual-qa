@@ -144,11 +144,11 @@ def main():
             if st.session_state.search_engine:
                 with st.spinner("Searching manual..."):
                     try:
-                        # Use semantic search
+                        # Use semantic search with more candidates for better results
                         search_results = st.session_state.search_engine.search(
                             question,
                             car_model=detected_model,
-                            top_k=5
+                            top_k=10
                         )
                         
                         if not search_results and detected_model:
@@ -157,7 +157,7 @@ def main():
                             search_results = st.session_state.search_engine.simple_keyword_search(
                                 question,
                                 car_model=detected_model,
-                                top_k=5
+                                top_k=10
                             )
                         
                         # Generate answer
