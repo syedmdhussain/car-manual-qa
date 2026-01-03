@@ -39,7 +39,11 @@ class ManualSearchEngine:
         """Load sentence transformer model if not already loaded."""
         if self.model is None:
             print(f"Loading sentence transformer model: {self.model_name}...")
-            self.model = SentenceTransformer(self.model_name)
+            import torch
+            device = 'cuda' if torch.cuda.is_available() else 'cpu'
+            self.model = SentenceTransformer(self.model_name, device=device)
+            # Ensure model is on correct device
+            self.model.to(device)
     
     def _get_cached_embedding(self, query: str) -> np.ndarray:
         """
